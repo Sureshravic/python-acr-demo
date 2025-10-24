@@ -1,19 +1,26 @@
-# Use official Python slim image
-FROM python:3.11-slim
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
-# Set work directory
+# set workdir
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
+# install build deps and remove apt lists to keep image small
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+ && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first (cached layer)
+COPY app/requirements.txt .
+
+# Install python deps
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app source
-COPY app ./app
+# Copy app sources
+COPY app /app
 
-# Set environment variables
+# Environment
 ENV PORT=80
 EXPOSE 80
 
-# Run the app with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:80", "app.main:app"]
+# Use gunicorn to serve the app (production)
+CMD ["gunicorn", "--bind", "0.0.0.0:80", "app:app", "--workers", "2"]
