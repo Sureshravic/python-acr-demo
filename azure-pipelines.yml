@@ -37,11 +37,20 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(Build.BuildId)
-          
+
+- stage: Release
+  displayName: Deploy to Azure Web App
+  dependsOn: Build      # <-- This makes Release run only after Build succeeds
+  condition: succeeded() # <-- Ensures it runs only if Build was successful
+  jobs:
+  - job: Deploy
+    displayName: Deploy container to Azure Web App
+    pool:
+      vmImage: $(vmImageName)
+    steps:
     - task: AzureWebAppContainer@1
       displayName: 'Deploy container to Azure Web App'
       inputs:
-        azureSubscription: 'sc-rg-azuredevops-demo'      # The name of your Azure service connection in DevOps
-        appName: 'pythondemodevops'                   # Your Azure Web App name
-        containers: 'azurepythondemoacr.azurecr.io/pythonapp:$(Build.BuildId)'  # Full image path (registry/repo:tag)
-
+        azureSubscription: 'sc-rg-azuredevops-demo'      # Azure service connection name
+        appName: 'pythondemodevops'                      # Your Azure Web App name
+        containers: 'azurepythondemoacr.azurecr.io/sureshravicpythonacrdemo:$(Build.BuildId)'  # Full image path
