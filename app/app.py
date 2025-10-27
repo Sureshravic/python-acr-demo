@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello from Flask on Azure App Service (deployed from Azure DevOps)!\n"
+    return "Hello from Flask on Azure App Service:) (deployed from Azure DevOps)!\n"
 
 @app.route("/health")
 def health():
